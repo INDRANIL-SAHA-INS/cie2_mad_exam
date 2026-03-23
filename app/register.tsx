@@ -24,6 +24,20 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [agree, setAgree] = useState(false);
+  const [errors, setErrors] = useState({ name: false, email: false, password: false });
+
+  const handleCreateAccount = () => {
+    const newErrors = {
+      name: name.trim() === "",
+      email: email.trim() === "",
+      password: password.trim() === "",
+    };
+    setErrors(newErrors);
+    // If any field is empty, do nothing
+    if (newErrors.name || newErrors.email || newErrors.password) return;
+    // All filled — go to success, replacing register in the stack
+    router.replace("/success");
+  };
 
   return (
     <View style={styles.root}>
@@ -39,7 +53,7 @@ export default function Register() {
 
       {/* Back button */}
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={20} color="#A78BFA" />
+        <Ionicons name="chevron-back" size={20} color="#66646cff" />
       </TouchableOpacity>
 
       <ScrollView
@@ -85,23 +99,24 @@ export default function Register() {
 
               <View style={styles.fieldBlock}>
                 <Text style={styles.label}>Full Name</Text>
-                <View style={styles.inputWrap}>
-                  <Ionicons name="person-outline" size={16} color="#7C3AED" style={styles.inputIcon} />
+                <View style={[styles.inputWrap, errors.name && styles.inputError]}>
+                  <Ionicons name="person-outline" size={16} color={errors.name ? "#F87171" : "#7C3AED"} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     placeholder="Jane Doe"
                     placeholderTextColor="#3D3360"
                     value={name}
-                    onChangeText={setName}
+                    onChangeText={(t) => { setName(t); setErrors((e) => ({ ...e, name: false })); }}
                     selectionColor="#A78BFA"
                   />
                 </View>
+                {errors.name && <Text style={styles.errorText}>Name is required</Text>}
               </View>
 
               <View style={styles.fieldBlock}>
                 <Text style={styles.label}>Email Address</Text>
-                <View style={styles.inputWrap}>
-                  <Ionicons name="mail-outline" size={16} color="#7C3AED" style={styles.inputIcon} />
+                <View style={[styles.inputWrap, errors.email && styles.inputError]}>
+                  <Ionicons name="mail-outline" size={16} color={errors.email ? "#F87171" : "#7C3AED"} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
                     placeholder="jane@studio.io"
@@ -109,29 +124,31 @@ export default function Register() {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={(t) => { setEmail(t); setErrors((e) => ({ ...e, email: false })); }}
                     selectionColor="#A78BFA"
                   />
                 </View>
+                {errors.email && <Text style={styles.errorText}>Email is required</Text>}
               </View>
 
               <View style={styles.fieldBlock}>
                 <Text style={styles.label}>Password</Text>
-                <View style={styles.inputWrap}>
-                  <Ionicons name="lock-closed-outline" size={16} color="#7C3AED" style={styles.inputIcon} />
+                <View style={[styles.inputWrap, errors.password && styles.inputError]}>
+                  <Ionicons name="lock-closed-outline" size={16} color={errors.password ? "#F87171" : "#7C3AED"} style={styles.inputIcon} />
                   <TextInput
                     style={[styles.input, { flex: 1 }]}
                     placeholder="Min. 8 characters"
                     placeholderTextColor="#3D3360"
                     secureTextEntry={!showPass}
                     value={password}
-                    onChangeText={setPassword}
+                    onChangeText={(t) => { setPassword(t); setErrors((e) => ({ ...e, password: false })); }}
                     selectionColor="#A78BFA"
                   />
                   <TouchableOpacity onPress={() => setShowPass(!showPass)} style={styles.eyeBtn}>
                     <Ionicons name={showPass ? "eye-off-outline" : "eye-outline"} size={16} color="#6B5FA0" />
                   </TouchableOpacity>
                 </View>
+                {errors.password && <Text style={styles.errorText}>Password is required</Text>}
                 {/* Strength bar */}
                 <View style={styles.strengthRow}>
                   <View style={styles.strengthBars}>
@@ -169,7 +186,7 @@ export default function Register() {
             </View>
 
             {/* Submit */}
-            <TouchableOpacity style={styles.submitWrap} activeOpacity={0.85}>
+            <TouchableOpacity style={styles.submitWrap} activeOpacity={0.85} onPress={handleCreateAccount}>
               <LinearGradient
                 colors={["#A78BFA", "#7C3AED"]}
                 start={{ x: 0, y: 0 }}
@@ -384,6 +401,16 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#7B6DAA",
     fontWeight: "600",
+  },
+  inputError: {
+    borderColor: "rgba(248, 113, 113, 0.5)",
+    backgroundColor: "rgba(248, 113, 113, 0.04)",
+  },
+  errorText: {
+    fontSize: 11,
+    color: "#F87171",
+    marginTop: 4,
+    marginLeft: 2,
   },
 
   // ─── CHECKBOX
